@@ -148,7 +148,7 @@ ACTION LOG records everything for audit
 *The main dashboard showing the 3D substation model, system metrics, and real-time data.*
 
 ### AI Insights Panel
-![AI Insights](./screenshots/ai-insights.PNG)
+![AI Insights](./screenshots/ai-insights.png)
 *AI-powered insights with dynamic confidence score and system health analysis.*
 
 ### 3D Substation View
