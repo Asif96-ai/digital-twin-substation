@@ -10,9 +10,10 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://digital-twin-substation.vercel.app",
     methods: ["GET", "POST"]
-  }
+  },
+  transports: ['websocket', 'polling']
 });
 
 app.use(cors());

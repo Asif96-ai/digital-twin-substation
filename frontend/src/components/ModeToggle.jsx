@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 
+const SOCKET_URL = (import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000').replace(/\/$/, '');
+const API_URL = `${SOCKET_URL}/api`;
+
 const ModeToggle = ({ currentMode, onModeToggle }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleToggle = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/control/mode', {
+      const response = await fetch(`${API_URL}/control/mode`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -26,7 +29,7 @@ const ModeToggle = ({ currentMode, onModeToggle }) => {
     <div className="mode-toggle">
       <div className="mode-display">
         <span className="mode-label">Current Mode:</span>
-        <span className={'mode-status ' + (currentMode === 'auto' ? 'auto-mode' : 'manual-mode')}>
+        <span className={`mode-status ${currentMode === 'auto' ? 'auto-mode' : 'manual-mode'}`}>
           {currentMode === 'auto' ? 'Auto-Fault' : 'Manual'}
         </span>
         <span className="mode-description">
@@ -37,7 +40,7 @@ const ModeToggle = ({ currentMode, onModeToggle }) => {
       </div>
       <button 
         onClick={handleToggle} 
-        className={'btn mode-btn ' + (currentMode === 'auto' ? 'btn-danger' : 'btn-primary')}
+        className={`btn mode-btn ${currentMode === 'auto' ? 'btn-danger' : 'btn-primary'}`}
         disabled={isLoading}
       >
         {isLoading ? 'Switching...' : currentMode === 'auto' ? 'Switch to Manual' : 'Switch to Auto-Fault Mode'}

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
+const SOCKET_URL = (import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000').replace(/\/$/, '');
+const API_URL = `${SOCKET_URL}/api`;
+
 const FaultPanel = ({ faultData, onGenerateFault, onUserAction, currentMode, countdownValue, userActionPending }) => {
   const [userResponded, setUserResponded] = useState(false);
   const [autoActionTaken, setAutoActionTaken] = useState(false);
@@ -94,7 +97,7 @@ const FaultPanel = ({ faultData, onGenerateFault, onUserAction, currentMode, cou
       setOperatorActions(actionsList);
       setActionTakenMessage('Operator executed ' + actionsList.length + ' corrective actions');
       
-      fetch('http://localhost:5000/api/fault/action', {
+      fetch(`${API_URL}/fault/action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -103,11 +106,10 @@ const FaultPanel = ({ faultData, onGenerateFault, onUserAction, currentMode, cou
         })
       });
     } else {
-      // AI action (from timer or "Let AI Handle" button)
       setAutoActionTaken(true);
       setActionTakenMessage('AI executed auto-correction protocol');
       
-      fetch('http://localhost:5000/api/fault/action', {
+      fetch(`${API_URL}/fault/action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'auto' })

@@ -9,7 +9,8 @@ import Recommendations from './components/Recommendations';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './App.css';
 
-const SOCKET_URL = 'http://localhost:5000';
+const SOCKET_URL = (import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000').replace(/\/$/, '');
+const API_URL = `${SOCKET_URL}/api`;
 
 function App() {
   const [socket, setSocket] = useState(null);
@@ -37,7 +38,7 @@ function App() {
 
   const generateFault = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/fault/generate', {
+      const response = await fetch(`${API_URL}/fault/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -74,7 +75,7 @@ function App() {
 
   const injectFault = async (type) => {
     try {
-      const response = await fetch('http://localhost:5000/api/control/anomaly', {
+      const response = await fetch(`${API_URL}/control/anomaly`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -83,7 +84,7 @@ function App() {
         })
       });
       const data = await response.json();
-      console.log('Fault injected on ' + selectedTransformer + ':', data);
+      console.log('Fault injected:', data);
     } catch (error) {
       console.error('Error injecting fault:', error);
     }
@@ -95,12 +96,29 @@ function App() {
 
   const handleResetComplete = (transformerId) => {
     console.log('Reset complete for ' + transformerId);
-    // You can add any additional logic here if needed
   };
 
   useEffect(() => {
-    const newSocket = io(SOCKET_URL);
+    const newSocket = io(SOCKET_URL, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
+    });
+    
     setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      console.log('✅ Socket.IO connected successfully!');
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('❌ Socket.IO connection error:', error);
+    });
+
+    newSocket.on('disconnect', (reason) => {
+      console.log('⚠️ Socket.IO disconnected:', reason);
+    });
 
     newSocket.on('substation-update', (data) => {
       setSubstationData(data);
@@ -159,7 +177,9 @@ function App() {
       setAiInsights(insights || []);
     });
 
-    return () => newSocket.close();
+    return () => {
+      newSocket.close();
+    };
   }, []);
 
   return (
@@ -184,9 +204,6 @@ function App() {
         </div>
       </header>
 
-      {/* ============================================
-          ANOMALY NOTIFICATION BAR - ALWAYS PRESENT
-          ============================================ */}
       <div className={`anomaly-notification-bar ${anomalies.length > 0 ? 'has-anomalies' : 'no-anomalies'}`}>
         <div className="anomaly-notification-icon" style={{ background: anomalies.length > 0 ? '#fc8181' : '#48bb78' }}>
           {anomalies.length > 0 ? '!' : '✓'}
